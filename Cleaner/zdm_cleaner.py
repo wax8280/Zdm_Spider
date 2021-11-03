@@ -31,6 +31,11 @@ class ZdmCleaner:
                 article_comment = int(item.get('article_comment', ''))
             else:
                 article_comment = int(float(item.get('article_comment', '').replace('k', '')) * 1000)
+                
+            if 'k' not in str(item.get('article_rating', '')):
+                article_rating = int(item.get('article_rating', ''))
+            else:
+                article_rating = int(float(item.get('article_rating', '').replace('k', '')) * 1000)
 
             # 计算分数
             time_diff = int(time.time()) - int(item.get('timesort', ''))
@@ -50,7 +55,7 @@ class ZdmCleaner:
                     article_mall=item.get('article_mall', ''),
                     article_pic_url=item.get('article_pic_url', ''),
                     article_price=item.get('article_price', ''),
-                    article_rating=item.get('article_rating', ''),
+                    article_rating=article_rating,
                     article_title=item.get('article_title', ''),
                     article_top_category=item.get('article_top_category', ''),
                     price_level=item['gtm'].get('dimension4', ''),
@@ -71,7 +76,7 @@ class ZdmCleaner:
                     article_mall=item.get('article_mall', ''),
                     article_pic_url=item.get('article_pic_url', ''),
                     article_price=item.get('article_price', ''),
-                    article_rating=item.get('article_rating', ''),
+                    article_rating=article_rating,
                     article_title=item.get('article_title', ''),
                     article_top_category=item.get('article_top_category', ''),
                     price_level=item['gtm'].get('dimension4', ''),

@@ -53,7 +53,7 @@ def get_article():
             'zhifa_tag': item.zhifa_tag,
             'article_collection': item.article_collection,
             'article_comment': item.article_comment,
-            'article_score': item.article_score,
+            'article_score': int(item.article_score),
             'local_article_pic_url': item.local_article_pic_url,
             'time_str':timestamp_to_str(item.timesort,format_str="%m-%d %H:%M")
         }
