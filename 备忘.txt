@@ -1,0 +1,26 @@
+表
+
+article
+article_content         str             <strong>20W超级快充，20000毫安大容量。</strong>这款倍思移动电源，具有20000mAh大电量，三出三入接口设计，支持 Micro、...
+article_id              str             41323592
+article_link            str             https://go.smzdm.com/65ba48acb07ce9be/ca_aa_yh_163_41323592_12696_4611_171_0
+article_url             str             https://www.smzdm.com/p/41323592/
+article_mall            str             京东
+article_pic_url         str             https://qny.smzdm.com/202111/02/618096f88ed894252.jpg_d200.jpg
+article_price           str             45.9元（需用券）
+article_rating          int             16
+article_title           str             3日0点：BASEUS 倍思 20W 移动电源20000mAh 白色
+article_top_category    str             电脑数码
+price_level             str             2阶价格
+timesort                str             1635791052
+zhifa_tag               str             绝对值、手慢无
+article_collection      int             130
+article_comment         int             35
+article_score           float           分数
+
+user
+username
+password
+
+
+read_rec
