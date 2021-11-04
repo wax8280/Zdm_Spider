@@ -3,11 +3,21 @@ import time
 from flask import request, abort, render_template, Blueprint
 
 from db.orm import Article, ReadRec, db
+from flask_server import app
 from lib import timestamp_to_str
 
 yuehou = Blueprint('yuehou', __name__, template_folder='templates')
 
 from flask_blueprint import auth
+
+@app.before_request
+def _db_conn():
+    db.connect()
+
+@app.teardown_request
+def __db_close(exc):
+    if not db.is_closed():
+        db.close()
 
 
 @yuehou.route('/get_article', methods=['GET'])
