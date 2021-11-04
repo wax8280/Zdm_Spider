@@ -10,14 +10,14 @@ yuehou = Blueprint('yuehou', __name__, template_folder='templates')
 
 from flask_blueprint import auth
 
-@app.before_request
-def _db_conn():
-    db.connect()
-
-@app.teardown_request
-def __db_close(exc):
-    if not db.is_closed():
-        db.close()
+# @app.before_request
+# def _db_conn():
+#     db.connect()
+#
+# @app.teardown_request
+# def __db_close(exc):
+#     if not db.is_closed():
+#         db.close()
 
 
 @yuehou.route('/get_article', methods=['GET'])
