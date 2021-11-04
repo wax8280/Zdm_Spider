@@ -34,10 +34,9 @@ class Article(BaseModel):
     article_comment = IntegerField()
     article_score = FloatField()
     local_article_pic_url = CharField()
+    stock_status_note = CharField()
 
 
 class ReadRec(BaseModel):
     username = CharField(index=True)
     article_id = CharField(index=True)
-
-

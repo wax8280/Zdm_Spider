@@ -31,7 +31,7 @@ class ZdmCleaner:
                 article_comment = int(item.get('article_comment', ''))
             else:
                 article_comment = int(float(item.get('article_comment', '').replace('k', '')) * 1000)
-                
+
             if 'k' not in str(item.get('article_rating', '')):
                 article_rating = int(item.get('article_rating', ''))
             else:
@@ -39,7 +39,8 @@ class ZdmCleaner:
 
             # 计算分数
             time_diff = int(time.time()) - int(item.get('timesort', ''))
-            article_score = (article_comment * 0.4 + article_collection * 0.6) / time_diff * 100000
+            article_score = (article_comment * 0.2 + article_rating * 0.5 + article_collection * 0.3) \
+                            / time_diff * 100000
 
             zhifa_tag = item['zhifa_tag'].get('name') if item['zhifa_tag'] else ''
 
@@ -62,7 +63,9 @@ class ZdmCleaner:
                     article_collection=article_collection,
                     article_comment=article_comment,
                     zhifa_tag=zhifa_tag,
-                    article_score=article_score).where(Article.article_id == item['article_id']).execute()
+                    article_score=article_score,
+                    stock_status_note=item.get('stock_status_note', ''),
+                ).where(Article.article_id == item['article_id']).execute()
             else:
                 try:
                     p = re.findall('\.(\w*)?$', item.get('article_url', ''))[0]
@@ -85,7 +88,8 @@ class ZdmCleaner:
                     zhifa_tag=zhifa_tag,
                     article_score=article_score,
                     article_id=item['article_id'],
-                    local_article_pic_url='{}.{}'.format(md5string(item.get('article_pic_url', '')), p)
+                    local_article_pic_url='{}.{}'.format(md5string(item.get('article_pic_url', '')), p),
+                    stock_status_note=item.get('stock_status_note', ''),
                 )
                 pic_url.append(item.get('article_pic_url', ''))
 
