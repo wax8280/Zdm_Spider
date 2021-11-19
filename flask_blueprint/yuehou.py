@@ -1,14 +1,15 @@
 import time
 
 from flask import request, abort, render_template, Blueprint
+from peewee import JOIN
 
 from db.orm import Article, ReadRec, db
-from flask_server import app
 from lib import timestamp_to_str
 
 yuehou = Blueprint('yuehou', __name__, template_folder='templates')
 
 from flask_blueprint import auth
+
 
 # @app.before_request
 # def _db_conn():
@@ -38,15 +39,15 @@ def get_article():
         if readed_to_insert:
             ReadRec.insert_many(readed_to_insert).execute()
 
-        # 获取24小时以内的
-        article_query = Article.select().where(Article.timesort > int(time.time()) - 60 * 60 * 48).order_by(Article.article_score.desc())
-        readed_query = ReadRec.select().where(ReadRec.username == user_name)
-        readed_set = set()
-        for item in readed_query:
-            readed_set.add(item.article_id)
+        # 获取12小时以内的
+        t2 = ReadRec.select(ReadRec.username, ReadRec.article_id).where(ReadRec.username == user_name).alias('t2')
+        article_query = Article.select().join(t2, JOIN.LEFT_OUTER, on=(Article.article_id == t2.c.article_id)).where(
+            (Article.timesort > int(time.time()) - 60 * 60 * 12) & (t2.c.article_id).is_null(True)).order_by(
+            Article.article_score.desc()).count().limit(50)
 
         result = []
         article_ids = []
+
         for item in article_query:
             a = {
                 'article_content': item.article_content,
@@ -67,15 +68,12 @@ def get_article():
                 'article_score': int(item.article_score),
                 'local_article_pic_url': item.local_article_pic_url,
                 'stock_status_note': item.stock_status_note,
-                'time_str':timestamp_to_str(item.timesort,format_str="%m-%d %H:%M")
+                'time_str': timestamp_to_str(item.timesort, format_str="%m-%d %H:%M")
             }
 
-            if a['article_id'] in readed_set:
-                continue
-            else:
-                result.append(a)
-                article_ids.append(a['article_id'])
+            result.append(a)
+            article_ids.append(a['article_id'])
 
-        article_ids_str = '^'.join(article_ids[:30])
+        article_ids_str = '^'.join(article_ids)
 
-    return render_template('base.html', articles=result[:30], article_ids_str=article_ids_str)
+    return render_template('base.html', articles=result, article_ids_str=article_ids_str)
