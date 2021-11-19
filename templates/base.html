@@ -12,6 +12,13 @@
 </head>
 
 <body>
+<nav class="navbar navbar-light bg-light">
+  <div class="container-fluid">
+    <span class="navbar-text">
+      更新时间：{{update_time}}
+    </span>
+  </div>
+</nav>
 {% for article in articles %}
 
 <div class="card" style="width:100%">
@@ -32,7 +39,7 @@
             </a>
         </h5>
 
-        <p class="card-text" style="font-size:small;"><small class="text-muted"><b style="color:goldenrod;">价格：{{ article.article_price
+        <p class="card-text" ><small class="text-muted"><b style="color:darkred;">价格：{{ article.article_price
             }} </b></small></p>
         <p class="card-text" style="font-size:small;"><small class="text-muted"><b>{{ article.article_mall }} | {{
             article.article_top_category }} | <b >热度：{{ article.article_score }}</b> | </b></small></p>

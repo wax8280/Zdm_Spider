@@ -1,7 +1,7 @@
 import time
 
 from flask import request, abort, render_template, Blueprint
-from peewee import JOIN
+from peewee import JOIN, fn
 
 from db.orm import Article, ReadRec, db
 from lib import timestamp_to_str
@@ -43,7 +43,9 @@ def get_article():
         t2 = ReadRec.select(ReadRec.username, ReadRec.article_id).where(ReadRec.username == user_name).alias('t2')
         article_query = Article.select().join(t2, JOIN.LEFT_OUTER, on=(Article.article_id == t2.c.article_id)).where(
             (Article.timesort > int(time.time()) - 60 * 60 * 12) & (t2.c.article_id).is_null(True)).order_by(
-            Article.article_score.desc()).count().limit(50)
+            Article.article_score.desc()).limit(50)
+
+        update_time = timestamp_to_str(Article.select(fn.MAX(Article.timesort)).scalar())
 
         result = []
         article_ids = []
@@ -76,4 +78,4 @@ def get_article():
 
         article_ids_str = '^'.join(article_ids)
 
-    return render_template('base.html', articles=result, article_ids_str=article_ids_str)
+    return render_template('base.html', articles=result, article_ids_str=article_ids_str, update_time=update_time)
