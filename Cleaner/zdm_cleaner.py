@@ -1,5 +1,6 @@
 import re
 import time
+from math import log
 
 from db.orm import Article
 from lib import md5string
@@ -39,8 +40,23 @@ class ZdmCleaner:
 
             # 计算分数
             time_diff = int(time.time()) - int(item.get('timesort', ''))
-            article_score = (article_comment * 0.2 + article_rating * 0.5 + article_collection * 0.3) \
-                            / time_diff * 100000
+
+            # 惩罚系数，针对赞、收藏比评论多很多的情况
+            if article_comment == 0 and (article_collection > 10 or article_rating > 10):
+                # 如果评论是0的话，收藏或值有任意一个超过10的话，惩罚系数为0.3
+                penalty_factor = 0.3
+            elif max((article_collection, article_rating)) == 0 and article_comment != 0:
+                # 对于收藏、赞为0的，惩罚系数为0.8
+                penalty_factor = 0.8
+            elif max((article_collection, article_rating)) == 0 and article_comment == 0:
+                penalty_factor = 0.5
+            else:
+                # 如10条评论，40条收藏，30个赞。则惩罚系数为10/40+0.5=0.9，如果大于1，则取1
+                penalty_factor = min((article_comment / max([article_collection, article_rating]) + 0.5, 1))
+
+            article_score = int(
+                (article_comment * 0.5 + article_rating * 0.2 + article_collection * 0.3) * penalty_factor / log(time_diff) * 100000
+            )
 
             zhifa_tag = item['zhifa_tag'].get('name') if item['zhifa_tag'] else ''
 
