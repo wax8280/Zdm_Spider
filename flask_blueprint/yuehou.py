@@ -2,11 +2,17 @@ import time
 
 from flask import request, abort, render_template, Blueprint
 from peewee import JOIN, fn
+from concurrent.futures import ThreadPoolExecutor
 
+from Cleaner.zdm_cleaner import ZdmCleaner
+from Spider.zdm_spider import ZdmSpider
+from config import sdm_page
 from db.orm import Article, ReadRec, db
 from lib import timestamp_to_str
+from lib.log import Log
 
 yuehou = Blueprint('yuehou', __name__, template_folder='templates')
+executor = ThreadPoolExecutor(2)
 
 from flask_blueprint import auth
 
@@ -19,6 +25,32 @@ from flask_blueprint import auth
 # def __db_close(exc):
 #     if not db.is_closed():
 #         db.close()
+
+def start_spider():
+    zdm_spider = ZdmSpider()
+    zdm_cleaner = ZdmCleaner()
+    logger = Log('Flask_Updater')
+
+    with db.connection_context():
+        for i in range(sdm_page):
+            res = zdm_spider.spider(i + 1)
+            pic_url = []
+
+            if res:
+                pic_url = zdm_cleaner.clean(res)
+                logger.logi('写库成功，第{}页'.format(i + 1))
+            else:
+                logger.logw('无法获得res.')
+
+            for url in pic_url:
+                zdm_spider.down_pic(url)
+
+@yuehou.route('/update_now', methods=['GET'])
+@auth.login_required
+def update_now():
+    executor.submit(start_spider)
+    return '正在更新，请稍后...'
+
 
 
 @yuehou.route('/get_article', methods=['GET'])
