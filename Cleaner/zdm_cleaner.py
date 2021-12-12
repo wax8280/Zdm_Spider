@@ -1,6 +1,5 @@
 import re
 import time
-from math import log
 
 from db.orm import Article
 from lib import md5string
@@ -55,7 +54,7 @@ class ZdmCleaner:
                 penalty_factor = min((article_comment / max([article_collection, article_rating]) + 0.5, 1))
 
             article_score = int(
-                (article_comment * 0.5 + article_rating * 0.2 + article_collection * 0.3) * penalty_factor / log(time_diff) * 100000
+                (article_comment * 0.5 + article_rating * 0.2 + article_collection * 0.3) * penalty_factor / time_diff * 100000
             )
 
             zhifa_tag = item['zhifa_tag'].get('name') if item['zhifa_tag'] else ''

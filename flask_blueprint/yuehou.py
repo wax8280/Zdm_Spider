@@ -45,6 +45,7 @@ def start_spider():
             for url in pic_url:
                 zdm_spider.down_pic(url)
 
+
 @yuehou.route('/update_now', methods=['GET'])
 @auth.login_required
 def update_now():
@@ -52,10 +53,10 @@ def update_now():
     return '正在更新，请稍后...'
 
 
-
 @yuehou.route('/get_article', methods=['GET'])
 @auth.login_required
 def get_article():
+    start_t = time.time()
     user_name = auth.username()
     readed_ids = request.args.get('readed').split('^') if request.args.get('readed') else []
     readed_to_insert = []
@@ -110,4 +111,5 @@ def get_article():
 
         article_ids_str = '^'.join(article_ids)
 
-    return render_template('base.html', articles=result, article_ids_str=article_ids_str, update_time=update_time)
+    return render_template('base.html', articles=result, article_ids_str=article_ids_str, update_time=update_time[5:],
+                           handle_time=str(time.time() - start_t)[:5])
