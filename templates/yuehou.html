@@ -1,0 +1,9 @@
+{% extends "hot.html" %}
+
+{% block body %}
+{{ super() }}
+<div class="d-grid gap-2">
+    <a class="btn btn-outline-success" href="./get_article?readed={{ article_ids_str }}" role="button"
+       style="margin_bottom:10px">Refresh</a>
+</div>
+{% endblock %}

@@ -12,54 +12,38 @@
 </head>
 
 <body>
-<nav class="navbar navbar-light bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <span class="navbar-text" style="font-size:0.8em">
+        <span class="navbar-text" style="font-size:0.8em">
       {{update_time}} | {{handle_time}}
     </span>
-      <a class="btn-sm btn-warning" href="./update_now" role="button">立刻更新</a>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="./update_now">更新</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            热门
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="./hot3">3小时</a></li>
+            <li><a class="dropdown-item" href="./hot6">6小时</a></li>
+            <li><a class="dropdown-item" href="./hot12">12小时</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="./hot24">24小时</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>
-{% for article in articles %}
 
-<div class="card" style="width:100%">
-    <a href="{{article.article_url}}" target="_blank" style="margin:0 auto;"><img src="/static/pic/{{article.local_article_pic_url}}" class="card-img-top" style="width:200px;" alt="..."></a>
-    <div class="card-body">
-        <h5 class="card-title">
-
-            <a href="{{article.article_url}}" target="_blank" style="{% if article.stock_status_note %}color:gray;{% else %}color:black;{% endif %} font-weight:bold;font-size:medium;">
-                {% if article.stock_status_note %}
-                    <b style="color:gray">  【{{ article.stock_status_note }}】</b>
-                {% endif %}
-
-                {{ article.article_title }}
-
-                {% if article.zhifa_tag %}
-                    <b style="color:brown">  【{{ article.zhifa_tag }}】</b>
-                {% endif %}
-            </a>
-        </h5>
-
-        <p class="card-text" ><small class="text-muted"><b style="color:darkred;">价格：{{ article.article_price
-            }} </b></small></p>
-        <p class="card-text" style="font-size:small;"><small class="text-muted"><b>{{ article.article_mall }} | {{
-            article.article_top_category }} | <b >热度：{{ article.article_score }}</b> | </b></small></p>
-
-        <p class="card-text" style="font-size:small;">{{ article.article_content | safe}}</p>
+{% block body %}
+{% endblock %}
 
 
-
-        <p class="card-text" style="text-align:right;font-size:small;"><small class="text-muted"><b>时间：{{
-            article.time_str }} | 值：{{ article.article_rating}} | 评论：{{ article.article_comment }} | 收藏：{{ article.article_collection
-            }} </b></small></p>
-    </div>
-</div>
-</div>
-{% endfor %}
-
-<div class="d-grid gap-2">
-    <a class="btn btn-outline-success" href="./get_article?readed={{ article_ids_str }}" role="button"
-       style="margin_bottom:10px">Refresh</a>
-</div>
 </body>
 </html>

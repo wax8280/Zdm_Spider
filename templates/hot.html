@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block body %}
+{% for article in articles %}
+<div class="card" style="width:100%">
+    <a href="{{article.article_url}}" target="_blank" style="margin:0 auto;"><img
+            src="/static/pic/{{article.local_article_pic_url}}" class="card-img-top" style="width:200px;" alt="..."></a>
+    <div class="card-body">
+        <h5 class="card-title">
+
+            <a href="{{article.article_url}}" target="_blank"
+               style="{% if article.stock_status_note %}color:gray;{% else %}color:black;{% endif %} font-weight:bold;font-size:medium;">
+                {% if article.stock_status_note %}
+                <b style="color:gray"> 【{{ article.stock_status_note }}】</b>
+                {% endif %}
+
+                {{ article.article_title }}
+
+                {% if article.zhifa_tag %}
+                <b style="color:brown"> 【{{ article.zhifa_tag }}】</b>
+                {% endif %}
+            </a>
+        </h5>
+
+        <p class="card-text"><small class="text-muted"><b style="color:darkred;">价格：{{ article.article_price
+            }} </b></small></p>
+        <p class="card-text" style="font-size:small;"><small class="text-muted"><b>{{ article.article_mall }} | {{
+            article.article_top_category }} | <b>热度：{{ article.article_score }}</b> | </b></small></p>
+
+        <p class="card-text" style="font-size:small;">{{ article.article_content | safe}}</p>
+
+
+        <p class="card-text" style="text-align:right;font-size:small;"><small class="text-muted"><b>时间：{{
+            article.time_str }} | 值：{{ article.article_rating}} | 评论：{{ article.article_comment }} | 收藏：{{
+            article.article_collection
+            }} </b></small></p>
+    </div>
+</div>
+</div>
+{% endfor %}
+{% endblock %}
