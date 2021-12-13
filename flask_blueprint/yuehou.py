@@ -89,7 +89,7 @@ def get_hot(hour):
 def hot3():
     start_t = time.time()
     result, update_time = get_hot(3)
-    return render_template('hot.html', articles=result, update_time=update_time[5:],
+    return render_template('hot.html', articles=result, update_time=update_time[5:-3],
                            handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms')
 
 
@@ -97,21 +97,21 @@ def hot3():
 def hot6():
     start_t = time.time()
     result, update_time = get_hot(6)
-    return render_template('hot.html', articles=result, update_time=update_time[5:],
+    return render_template('hot.html', articles=result, update_time=update_time[5:-3],
                            handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms')
 
 @yuehou.route('/hot12', methods=['GET'])
 def hot12():
     start_t = time.time()
     result, update_time = get_hot(12)
-    return render_template('hot.html', articles=result, update_time=update_time[5:],
+    return render_template('hot.html', articles=result, update_time=update_time[5:-3],
                            handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms')
 
 @yuehou.route('/hot24', methods=['GET'])
 def hot24():
     start_t = time.time()
     result, update_time = get_hot(24)
-    return render_template('hot.html', articles=result, update_time=update_time[5:],
+    return render_template('hot.html', articles=result, update_time=update_time[5:-3],
                            handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms')
 
 @yuehou.route('/get_article', methods=['GET'])
@@ -172,5 +172,5 @@ def get_article():
 
         article_ids_str = '^'.join(article_ids)
 
-    return render_template('yuehou.html', articles=result, article_ids_str=article_ids_str, update_time=update_time[5:],
+    return render_template('yuehou.html', articles=result, article_ids_str=article_ids_str, update_time=update_time[5:-3],
                            handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms')
