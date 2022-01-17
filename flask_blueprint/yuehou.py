@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from Cleaner.zdm_cleaner import ZdmCleaner
 from Spider.zdm_spider import ZdmSpider
 from config import sdm_page
-from db.orm import Article, ReadRec, db
+from db.orm import Article, ReadRec, db, FocusItem
 from lib import timestamp_to_str
 from lib.log import Log
 
@@ -100,12 +100,14 @@ def hot6():
     return render_template('hot.html', articles=result, update_time=update_time[5:-3],
                            handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms')
 
+
 @yuehou.route('/hot12', methods=['GET'])
 def hot12():
     start_t = time.time()
     result, update_time = get_hot(12)
     return render_template('hot.html', articles=result, update_time=update_time[5:-3],
                            handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms')
+
 
 @yuehou.route('/hot24', methods=['GET'])
 def hot24():
@@ -114,24 +116,63 @@ def hot24():
     return render_template('hot.html', articles=result, update_time=update_time[5:-3],
                            handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms')
 
+
+def wrap_item(article_query):
+    result = []
+    article_ids = []
+
+    for item in article_query:
+        a = {
+            'article_content': item.article_content,
+            'article_id': item.article_id,
+            'article_link': item.article_link,
+            'article_url': item.article_url,
+            'article_mall': item.article_mall,
+            'article_pic_url': item.article_pic_url,
+            'article_price': item.article_price,
+            'article_rating': item.article_rating,
+            'article_title': item.article_title,
+            'article_top_category': item.article_top_category,
+            'price_level': item.price_level,
+            'timesort': item.timesort,
+            'zhifa_tag': item.zhifa_tag,
+            'article_collection': item.article_collection,
+            'article_comment': item.article_comment,
+            'article_score': int(item.article_score),
+            'local_article_pic_url': item.local_article_pic_url,
+            'stock_status_note': item.stock_status_note,
+            'time_str': timestamp_to_str(item.timesort, format_str="%m-%d %H:%M")
+        }
+
+        result.append(a)
+        article_ids.append(a['article_id'])
+
+    article_ids_str = '^'.join(article_ids)
+
+    return result, article_ids_str
+
+
+def insert_read(read_ids, user_name):
+    read_to_insert = []
+    for read_id in read_ids:
+        read_to_insert.append({
+            'username': user_name,
+            'article_id': read_id
+        })
+
+    if read_to_insert:
+        ReadRec.insert_many(read_to_insert).execute()
+
+
 @yuehou.route('/get_article', methods=['GET'])
 @auth.login_required
 def get_article():
     start_t = time.time()
     user_name = auth.username()
-    readed_ids = request.args.get('readed').split('^') if request.args.get('readed') else []
-    readed_to_insert = []
-
-    for readed_id in readed_ids:
-        readed_to_insert.append({
-            'username': user_name,
-            'article_id': readed_id
-        })
+    read_ids = request.args.get('readed').split('^') if request.args.get('readed') else []
 
     with db.connection_context():
-
-        if readed_to_insert:
-            ReadRec.insert_many(readed_to_insert).execute()
+        insert_read(read_ids, user_name)
 
         # 获取24小时以内的
         t2 = ReadRec.select(ReadRec.username, ReadRec.article_id).where(ReadRec.username == user_name).alias('t2')
@@ -141,36 +182,57 @@ def get_article():
 
         update_time = timestamp_to_str(Article.select(fn.MAX(Article.timesort)).scalar())
 
-        result = []
-        article_ids = []
+        result, article_ids_str = wrap_item(article_query)
 
-        for item in article_query:
-            a = {
-                'article_content': item.article_content,
-                'article_id': item.article_id,
-                'article_link': item.article_link,
-                'article_url': item.article_url,
-                'article_mall': item.article_mall,
-                'article_pic_url': item.article_pic_url,
-                'article_price': item.article_price,
-                'article_rating': item.article_rating,
-                'article_title': item.article_title,
-                'article_top_category': item.article_top_category,
-                'price_level': item.price_level,
-                'timesort': item.timesort,
-                'zhifa_tag': item.zhifa_tag,
-                'article_collection': item.article_collection,
-                'article_comment': item.article_comment,
-                'article_score': int(item.article_score),
-                'local_article_pic_url': item.local_article_pic_url,
-                'stock_status_note': item.stock_status_note,
-                'time_str': timestamp_to_str(item.timesort, format_str="%m-%d %H:%M")
-            }
+    return render_template('yuehou.html',
+                           articles=result,
+                           article_ids_str=article_ids_str,
+                           update_time=update_time[5:-3],
+                           handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms')
 
-            result.append(a)
-            article_ids.append(a['article_id'])
 
-        article_ids_str = '^'.join(article_ids)
+@yuehou.route('/get_focus', methods=['GET'])
+@auth.login_required
+def get_focus():
+    start_t = time.time()
+    user_name = auth.username()
+    read_ids = request.args.get('readed').split('^') if request.args.get('readed') else []
 
-    return render_template('yuehou.html', articles=result, article_ids_str=article_ids_str, update_time=update_time[5:-3],
+    with db.connection_context():
+        insert_read(read_ids, user_name)
+
+        focus_items_query = FocusItem.select(FocusItem.username, FocusItem.key_words, FocusItem.thresh_hold).where(
+            FocusItem.username == user_name)
+
+        focus_items = [(item.key_words, item.thresh_hold) for item in focus_items_query]
+
+        all_result = []
+        all_article_ids_str = ''
+
+        for each_focus_item in focus_items:
+            key_words, thresh_hold = each_focus_item
+            t2 = ReadRec.select(ReadRec.username, ReadRec.article_id).where(ReadRec.username == user_name).alias('t2')
+
+            article_query = Article.select().join(t2, JOIN.LEFT_OUTER,
+                                                  on=(Article.article_id == t2.c.article_id)).where(
+                (Article.timesort > int(time.time()) - 60 * 60 * 24) &
+                (t2.c.article_id).is_null(True) &
+                (Article.article_score > thresh_hold) &
+                (Article.article_title.contains(key_words))
+            ).order_by(Article.article_score.desc())
+
+            result, _ = wrap_item(article_query)
+            all_result.extend(result)
+
+        all_result = sorted(all_result, key=lambda i: i['article_score'], reverse=True)[:50]
+        article_ids_str = '^'.join([i['article_id'] for i in all_result])
+
+
+        update_time = timestamp_to_str(Article.select(fn.MAX(Article.timesort)).scalar())
+
+
+    return render_template('focus.html',
+                           articles=all_result,
+                           article_ids_str=article_ids_str,
+                           update_time=update_time[5:-3],
                            handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms')

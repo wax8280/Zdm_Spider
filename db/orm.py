@@ -40,3 +40,8 @@ class Article(BaseModel):
 class ReadRec(BaseModel):
     username = CharField(index=True)
     article_id = CharField(index=True)
+
+class FocusItem(BaseModel):
+    username = CharField(index=True)
+    key_words = CharField()
+    thresh_hold = FloatField()
