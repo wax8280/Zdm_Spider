@@ -133,10 +133,10 @@ def get_article():
         if readed_to_insert:
             ReadRec.insert_many(readed_to_insert).execute()
 
-        # 获取12小时以内的
+        # 获取24小时以内的
         t2 = ReadRec.select(ReadRec.username, ReadRec.article_id).where(ReadRec.username == user_name).alias('t2')
         article_query = Article.select().join(t2, JOIN.LEFT_OUTER, on=(Article.article_id == t2.c.article_id)).where(
-            (Article.timesort > int(time.time()) - 60 * 60 * 12) & (t2.c.article_id).is_null(True)).order_by(
+            (Article.timesort > int(time.time()) - 60 * 60 * 24) & (t2.c.article_id).is_null(True)).order_by(
             Article.article_score.desc()).limit(25)
 
         update_time = timestamp_to_str(Article.select(fn.MAX(Article.timesort)).scalar())
