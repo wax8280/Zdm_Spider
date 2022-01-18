@@ -209,17 +209,34 @@ def get_focus():
         all_result = []
         all_article_ids_str = ''
 
+        t2 = ReadRec.select(ReadRec.username, ReadRec.article_id).where(ReadRec.username == user_name).alias('t2')
+
         for each_focus_item in focus_items:
             key_words, thresh_hold = each_focus_item
-            t2 = ReadRec.select(ReadRec.username, ReadRec.article_id).where(ReadRec.username == user_name).alias('t2')
 
-            article_query = Article.select().join(t2, JOIN.LEFT_OUTER,
-                                                  on=(Article.article_id == t2.c.article_id)).where(
-                (Article.timesort > int(time.time()) - 60 * 60 * 24) &
-                (t2.c.article_id).is_null(True) &
-                (Article.article_score > thresh_hold) &
-                (Article.article_title.contains(key_words))
-            ).order_by(Article.article_score.desc())
+            if '买到就是赚' in key_words or '免费领' in key_words or '历史低价' in key_words or '国民爆款' in key_words \
+                    or '复古款' in key_words or '平替款' in key_words or '必看促销' in key_words or '必领神券' in key_words \
+                    or '悦己主义' in key_words or '情怀党' in key_words or '手慢无' in key_words or '新品尝鲜' in key_words\
+                    or '新国货' in key_words or '智能家' in key_words or '权威背书' in key_words or '治愈系' in key_words \
+                    or '环保生活' in key_words or '白菜党' in key_words or '硬核' in key_words or '简约设计' in key_words \
+                    or '经典款' in key_words or '绝对值' in key_words or '老字号' in key_words or '联名款' in key_words or \
+                    '行业标杆' in key_words or '跟着买' in key_words or '限定款' in key_words or '高端秀' in key_words or \
+                    '高颜值' in key_words or '黑科技' in key_words:
+                article_query = Article.select().join(t2, JOIN.LEFT_OUTER,
+                                                      on=(Article.article_id == t2.c.article_id)).where(
+                    (Article.timesort > int(time.time()) - 60 * 60 * 24) &
+                    (t2.c.article_id).is_null(True) &
+                    (Article.article_score > thresh_hold) &
+                    (Article.zhifa_tag.contains(key_words))
+                ).order_by(Article.article_score.desc())
+            else:
+                article_query = Article.select().join(t2, JOIN.LEFT_OUTER,
+                                                      on=(Article.article_id == t2.c.article_id)).where(
+                    (Article.timesort > int(time.time()) - 60 * 60 * 24) &
+                    (t2.c.article_id).is_null(True) &
+                    (Article.article_score > thresh_hold) &
+                    (Article.article_title.contains(key_words))
+                ).order_by(Article.article_score.desc())
 
             result, _ = wrap_item(article_query)
             all_result.extend(result)
@@ -227,9 +244,7 @@ def get_focus():
         all_result = sorted(all_result, key=lambda i: i['article_score'], reverse=True)[:50]
         article_ids_str = '^'.join([i['article_id'] for i in all_result])
 
-
         update_time = timestamp_to_str(Article.select(fn.MAX(Article.timesort)).scalar())
-
 
     return render_template('focus.html',
                            articles=all_result,
