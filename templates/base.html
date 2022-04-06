@@ -68,6 +68,14 @@
     </li>
 </ul>
 
+{% if fund.guozhai_grade %}
+<p>
+    国债：{% fund.guozhai_grade %}  |   巴菲特：{% fund.bafeite_grade %}  |   沪深300：{% fund.danjuan_grade %}
+</p>
+
+
+{% endif %}
+
 
 {% block body %}
 {% endblock %}

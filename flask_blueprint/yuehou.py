@@ -1,10 +1,12 @@
 import time
+import datetime
 
 from flask import request, abort, render_template, Blueprint
 from peewee import JOIN, fn
 from concurrent.futures import ThreadPoolExecutor
 
 from Cleaner.zdm_cleaner import ZdmCleaner
+from Spider.fund_spider import FundSpider
 from Spider.zdm_spider import ZdmSpider
 from config import sdm_page
 from db.orm import Article, ReadRec, db, FocusItem
@@ -164,6 +166,11 @@ def insert_read(read_ids, user_name):
         ReadRec.insert_many(read_to_insert).execute()
 
 
+last_day = {
+    'vincent': 0
+}
+
+
 @yuehou.route('/get_article', methods=['GET'])
 @auth.login_required
 def get_article():
@@ -183,6 +190,30 @@ def get_article():
         update_time = timestamp_to_str(Article.select(fn.MAX(Article.timesort)).scalar())
 
         result, article_ids_str = wrap_item(article_query)
+
+    fund = {
+        'guozhai_grade': '',
+        'bafeite_grade': '',
+        'danjuan_grade': '',
+    }
+    if last_day[user_name] != datetime.date.today().day:
+        fundspider = FundSpider()
+        guozhai_grade, bafeite_grade, danjuan_grade = fundspider.main()
+        fund = {
+            'guozhai_grade': guozhai_grade,
+            'bafeite_grade': bafeite_grade,
+            'danjuan_grade': danjuan_grade,
+        }
+
+        last_day[user_name] = datetime.date.today().day
+
+        return render_template('yuehou.html',
+                               articles=result,
+                               article_ids_str=article_ids_str,
+                               update_time=update_time[5:-3],
+                               handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms',
+                               fund=fund,
+                               )
 
     return render_template('yuehou.html',
                            articles=result,
@@ -216,7 +247,7 @@ def get_focus():
 
             if '买到就是赚' in key_words or '免费领' in key_words or '历史低价' in key_words or '国民爆款' in key_words \
                     or '复古款' in key_words or '平替款' in key_words or '必看促销' in key_words or '必领神券' in key_words \
-                    or '悦己主义' in key_words or '情怀党' in key_words or '手慢无' in key_words or '新品尝鲜' in key_words\
+                    or '悦己主义' in key_words or '情怀党' in key_words or '手慢无' in key_words or '新品尝鲜' in key_words \
                     or '新国货' in key_words or '智能家' in key_words or '权威背书' in key_words or '治愈系' in key_words \
                     or '环保生活' in key_words or '白菜党' in key_words or '硬核' in key_words or '简约设计' in key_words \
                     or '经典款' in key_words or '绝对值' in key_words or '老字号' in key_words or '联名款' in key_words or \
