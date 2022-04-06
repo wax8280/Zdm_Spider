@@ -191,11 +191,6 @@ def get_article():
 
         result, article_ids_str = wrap_item(article_query)
 
-    fund = {
-        'guozhai_grade': '',
-        'bafeite_grade': '',
-        'danjuan_grade': '',
-    }
     if last_day[user_name] != datetime.date.today().day:
         fundspider = FundSpider()
         guozhai_grade, bafeite_grade, danjuan_grade = fundspider.main()
@@ -212,8 +207,7 @@ def get_article():
                                article_ids_str=article_ids_str,
                                update_time=update_time[5:-3],
                                handle_time=str(float(str(time.time() - start_t)[:5]) * 1000) + 'ms',
-                               fund=fund,
-                               )
+                               fund=fund,)
 
     return render_template('yuehou.html',
                            articles=result,
