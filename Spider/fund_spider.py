@@ -96,16 +96,22 @@ class FundSpider:
 
     @staticmethod
     def grade(the_min, the_max, now, grade=10):
-        now = float(now)
-        s = (the_max - the_min) / (grade - 1)
-        s_list = [the_min + s * i for i in range(grade)]
+            now = float(now)
+            s = (the_max - the_min) / (grade - 1)
+            s_list = [the_min + s * i for i in range(grade)]
 
-        if now > the_max:
-            return grade
+            print(s_list)
 
-        for index, item in enumerate(s_list):
-            if item > now:
-                return index + 1
+            if now > the_max:
+                return grade
+
+            for index, item in enumerate(s_list):
+                if item > now:
+                    last_one = s_list[index - 1]
+                    if abs(last_one - now) < abs(item - now):
+                        return index
+                    else:
+                        return index + 1
 
     def main(self):
         guozhai_data = self.guozhai()
