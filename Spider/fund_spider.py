@@ -100,8 +100,6 @@ class FundSpider:
             s = (the_max - the_min) / (grade - 1)
             s_list = [the_min + s * i for i in range(grade)]
 
-            print(s_list)
-
             if now > the_max:
                 return grade
 
