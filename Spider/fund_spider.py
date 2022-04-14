@@ -14,6 +14,7 @@ class FundSpider:
         self.session = requests.session()
         self.retry_count = retry_count
         self.retry_time_sleep = retry_time_sleep
+        self.logger = Log('FundSpider')
 
         self.guozhai_headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -47,6 +48,7 @@ class FundSpider:
 
             while retry_time < self.retry_count:
                 try:
+                    self.logger.logd('正在请求国债数据')
                     res = requests.post('http://www.dashiyetouzi.com/tools/compare/hs300_10gz_pro_data.php', headers=self.guozhai_headers, verify=False)
                     json_data = res.json()['list'][-1]
 
@@ -63,6 +65,8 @@ class FundSpider:
 
             while retry_time < self.retry_count:
                 try:
+                    self.logger.logd('正在请求巴菲特数据')
+
                     res = requests.get('https://legulegu.com/stockdata/marketcap-gdp', headers=self.bafeite_headers, verify=False)
                     group = re.search('id="data-description">(.*?)年(.*?)月(.*?)日，总市值比GDP值为：(.*?)%</p>', res.text)
 
@@ -75,24 +79,24 @@ class FundSpider:
 
     def danjuan(self):
         retry_time = 0
-        try:
 
-            result = {}
-            while retry_time < self.retry_count:
-                try:
-                    json_data = requests.get('https://danjuanapp.com/djapi/index_eva/dj', headers=self.danjuan_headers, verify=False).json()
+        result = {}
+        while retry_time < self.retry_count:
+            try:
+                self.logger.logd('正在请求蛋卷数据。第{}次'.format(retry_time))
 
-                    for i in json_data['data']['items']:
-                        if i['name'] == '沪深300':
-                            result['300'] = i['pe']
-                        elif i['name'] == '上证50':
-                            result['50'] = i['pe']
-                except:
-                    retry_time += 1
-        except:
-            pass
+                json_data = requests.get('https://danjuanapp.com/djapi/index_eva/dj', headers=self.danjuan_headers, verify=False).json()
 
-        return result
+                for i in json_data['data']['items']:
+                    if i['name'] == '沪深300':
+                        result['300'] = i['pe']
+                    elif i['name'] == '上证50':
+                        result['50'] = i['pe']
+
+                return result
+            except:
+                retry_time += 1
+
 
     @staticmethod
     def grade(the_min, the_max, now, grade=10):
