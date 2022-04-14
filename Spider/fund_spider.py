@@ -77,17 +77,22 @@ class FundSpider:
         retry_time = 0
         try:
 
+            result = {}
             while retry_time < self.retry_count:
                 try:
                     json_data = requests.get('https://danjuanapp.com/djapi/index_eva/dj', headers=self.danjuan_headers, verify=False).json()
 
                     for i in json_data['data']['items']:
                         if i['name'] == '沪深300':
-                            return i['pe']
+                            result['300'] = i['pe']
+                        elif i['name'] == '上证50':
+                            result['50'] = i['pe']
                 except:
                     retry_time += 1
         except:
             pass
+
+        return result
 
     @staticmethod
     def grade(the_min, the_max, now, grade=10):
@@ -107,11 +112,9 @@ class FundSpider:
         bafeite_data = self.bafeite()
         danjuan_data = self.danjuan()
 
-        guozhai_grade = FundSpider.grade(1.57, 3.54, guozhai_data[1], 10)
-        bafeite_grade = FundSpider.grade(20, 120, bafeite_data[1], 10)
-        danjuan_grade = FundSpider.grade(8, 18, danjuan_data, 10)
+        guozhai_grade = FundSpider.grade(1.6, 3.54, guozhai_data[1], 10)       # 越高风险越小
+        bafeite_grade = 11 - FundSpider.grade(20, 120, bafeite_data[1], 10)     # 越高风险越大
+        danjuan_hushen_300_grade = 11 - FundSpider.grade(8, 18, danjuan_data['300'], 10)          # 越高风险越大
+        danjuan_shangzheng_50_grade = 11 - FundSpider.grade(7, 14.95, danjuan_data['50'], 10)          # 越高风险越大
 
-
-
-        return guozhai_grade, bafeite_grade, danjuan_grade
-
+        return guozhai_grade, bafeite_grade, danjuan_hushen_300_grade,danjuan_shangzheng_50_grade

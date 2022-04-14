@@ -194,11 +194,12 @@ def get_article():
     if last_day[user_name] != datetime.date.today().day:
         print('spider fund')
         fundspider = FundSpider()
-        guozhai_grade, bafeite_grade, danjuan_grade = fundspider.main()
+        guozhai_grade, bafeite_grade, danjuan_hushen_300_grade,danjuan_shangzheng_50_grade = fundspider.main()
         fund = {
             'guozhai_grade': guozhai_grade,
             'bafeite_grade': bafeite_grade,
-            'danjuan_grade': danjuan_grade,
+            'danjuan_hushen_300_grade': danjuan_hushen_300_grade,
+            'danjuan_shangzheng_50_grade': danjuan_shangzheng_50_grade,
         }
 
         last_day[user_name] = datetime.date.today().day
